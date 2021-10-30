@@ -1,4 +1,4 @@
-package customstorage
+package permissivefilestorage
 
 import (
 	"io/ioutil"
@@ -27,6 +27,15 @@ func (PermissiveStorage) CaddyModule() caddy.ModuleInfo {
 		ID:  "caddy.storage.permissive_file_storage",
 		New: func() caddy.Module { return new(PermissiveStorage) },
 	}
+}
+
+// CertMagicStorage converts s to a certmagic.Storage instance.
+func (s PermissiveStorage) CertMagicStorage() (certmagic.Storage, error) {
+	return &CertmagicStorage{
+		FileStorage: certmagic.FileStorage{
+			Path: s.Root,
+		},
+	}, nil
 }
 
 // Override Store to use globally-readable permissions

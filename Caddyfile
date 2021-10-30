@@ -1,0 +1,9 @@
+{
+  storage permissive_file_storage {
+    root "/tmp/caddy"
+  }
+  http_port 8080
+  https_port 4443
+}
+
+localhost

@@ -1,4 +1,4 @@
-module gitlab.com/shroud/caddy-globallyreadablestorage
+module gitlab.com/shroud/caddy-permissive-file-storage
 
 go 1.16
 

@@ -1,12 +1,13 @@
 # Compile caddy with custom modules
-FROM caddy:2.4.5-builder as builder
+# Uses a recent Caddy builder image (Go 1.24+ toolchain)
+FROM caddy:2.10-builder AS builder
 
-ENV CADDY_VERSION=v2.4.5
-RUN xcaddy build \
-    --with github.com/Shroud-email/caddy-permissive-file-storage
+COPY . /src
+RUN xcaddy build v2.10.0 \
+    --with github.com/Shroud-email/caddy-permissive-file-storage=/src
 
 # Production image
-FROM caddy:2.4.5-alpine
+FROM caddy:2.10-alpine
 
 COPY --from=builder /usr/bin/caddy /usr/bin/caddy
 VOLUME /etc/caddy/Caddyfile

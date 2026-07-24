@@ -1,7 +1,7 @@
 package permissivefilestorage
 
 import (
-	"io/ioutil"
+	"context"
 	"os"
 	"path/filepath"
 
@@ -39,11 +39,11 @@ func (s PermissiveStorage) CertMagicStorage() (certmagic.Storage, error) {
 }
 
 // Override Store to use globally-readable permissions
-func (fs *CertmagicStorage) Store(key string, value []byte) error {
+func (fs *CertmagicStorage) Store(_ context.Context, key string, value []byte) error {
 	filename := fs.Filename(key)
 	err := os.MkdirAll(filepath.Dir(filename), 0755)
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filename, value, 0644)
+	return os.WriteFile(filename, value, 0644)
 }

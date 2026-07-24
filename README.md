@@ -17,3 +17,18 @@ localhost
 ```
 
 This is used for certificate provisioning in [Shroud.email](https://shroud.email/).
+
+## Development
+
+### Tests
+
+An end-to-end test builds Caddy with this plugin, runs it with `tls internal`,
+and asserts that cert/key files are written with world-readable permissions
+(`0644` files, `0755` directories).
+
+```bash
+bash test/e2e.sh
+```
+
+The test self-skips if [`xcaddy`](https://github.com/caddyserver/xcaddy) is not
+installed or ports 8080/9443 are in use. CI runs it on every push to `main`.

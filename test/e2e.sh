@@ -12,6 +12,7 @@
 # or a port collision is a real failure, not a pass.
 
 set -euo pipefail
+umask 022
 
 # --- config ---
 CADDY_VERSION="v2.10.0"   # keep in sync with go.mod's caddy/v2 requirement
@@ -26,7 +27,7 @@ if ! command -v xcaddy >/dev/null 2>&1; then
 fi
 
 # --- fail if ports are taken ---
-port_taken() { nc -z 127.0.0.1 "$1" 2>/dev/null; }
+port_taken() { (echo >"/dev/tcp/127.0.0.1/$1") 2>/dev/null; }
 if port_taken "$HTTP_PORT" || port_taken "$HTTPS_PORT"; then
   echo "FAIL: port $HTTP_PORT or $HTTPS_PORT is already in use" >&2
   exit 1
@@ -98,17 +99,18 @@ for i in 1 2 3 4 5; do
   sleep 1
 done
 
-# --- poll for the cert file to appear (issuance signal) ---
-echo "==> Waiting for cert to be written to storage..."
+# --- poll for the cert and key files to appear (issuance signal) ---
+echo "==> Waiting for cert and key to be written to storage..."
 CERT_FILE="$STORAGE_ROOT/certificates/local/localhost/localhost.crt"
+KEY_FILE="$STORAGE_ROOT/certificates/local/localhost/localhost.key"
 for i in $(seq 1 20); do
-  if [[ -f "$CERT_FILE" ]]; then
+  if [[ -f "$CERT_FILE" && -f "$KEY_FILE" ]]; then
     break
   fi
   sleep 0.5
 done
-if [[ ! -f "$CERT_FILE" ]]; then
-  echo "FAIL: cert file not written: $CERT_FILE" >&2
+if [[ ! -f "$CERT_FILE" || ! -f "$KEY_FILE" ]]; then
+  echo "FAIL: cert or key file not written: $CERT_FILE / $KEY_FILE" >&2
   echo "--- Caddy log ---" >&2
   cat "$CADDY_LOG" >&2
   echo "--- storage tree ---" >&2

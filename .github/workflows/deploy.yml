@@ -27,7 +27,7 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+      - run: go install github.com/caddyserver/xcaddy/cmd/xcaddy@v0.4.6
       - run: bash test/e2e.sh
 
   deploy:

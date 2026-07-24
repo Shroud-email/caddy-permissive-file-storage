@@ -8,8 +8,8 @@
 # Run locally:  bash test/e2e.sh
 # Run in CI:    see .github/workflows/deploy.yml (test job)
 #
-# Exits 0 on success, non-zero on failure, 0 with a skip message if xcaddy
-# is absent or the required ports are taken.
+# Exits 0 on success, non-zero on failure. Never self-skips: missing xcaddy
+# or a port collision is a real failure, not a pass.
 
 set -euo pipefail
 
@@ -19,17 +19,17 @@ HTTP_PORT=8080
 HTTPS_PORT=9443
 PLUGIN_MODULE="github.com/Shroud-email/caddy-permissive-file-storage"
 
-# --- skip if xcaddy is not installed ---
+# --- fail if xcaddy is not installed ---
 if ! command -v xcaddy >/dev/null 2>&1; then
-  echo "SKIP: xcaddy not found on PATH; install with 'go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest'"
-  exit 0
+  echo "FAIL: xcaddy not found on PATH; install with 'go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest'" >&2
+  exit 1
 fi
 
-# --- skip if ports are taken ---
+# --- fail if ports are taken ---
 port_taken() { nc -z 127.0.0.1 "$1" 2>/dev/null; }
 if port_taken "$HTTP_PORT" || port_taken "$HTTPS_PORT"; then
-  echo "SKIP: port $HTTP_PORT or $HTTPS_PORT is already in use"
-  exit 0
+  echo "FAIL: port $HTTP_PORT or $HTTPS_PORT is already in use" >&2
+  exit 1
 fi
 
 # --- temp dirs ---

@@ -2,6 +2,8 @@ name: Deploy
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 permissions:
   contents: read
@@ -20,6 +22,7 @@ jobs:
 
   deploy:
     needs: [test]
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
